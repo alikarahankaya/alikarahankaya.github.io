@@ -108,10 +108,6 @@ public enum Tuning {
     public static let maximumTracePoints = 1500
     public static let maximumRhythmPoints = 1500
 
-    // MARK: Worth keeping
-
-    /// Drives shorter than these are errands, not drives, and are discarded
-    /// without asking.
-    public static let minimumDriveDuration: TimeInterval = 3 * 60
-    public static let minimumDriveDistance: Double = 2000
+    // Drives too short to be drives are discarded without asking; the
+    // thresholds live in Core.Keeping, because capture needs them too.
 }
