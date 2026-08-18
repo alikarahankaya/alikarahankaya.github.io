@@ -53,16 +53,24 @@ let package = Package(
         ),
 
         .testTarget(name: "CoreTests", dependencies: ["Core"], swiftSettings: strict),
-        .testTarget(name: "GPXTests", dependencies: ["GPX", "Fixtures"], swiftSettings: strict),
         .testTarget(
-            name: "AnalysisTests",
-            dependencies: ["Analysis", "Fixtures"],
+            name: "GPXTests",
+            dependencies: ["Core", "GPX", "Fixtures"],
             swiftSettings: strict
         ),
-        .testTarget(name: "StorageTests", dependencies: ["Storage"], swiftSettings: strict),
+        .testTarget(
+            name: "AnalysisTests",
+            dependencies: ["Core", "Analysis", "Fixtures"],
+            swiftSettings: strict
+        ),
+        .testTarget(
+            name: "StorageTests",
+            dependencies: ["Core", "Storage"],
+            swiftSettings: strict
+        ),
         .testTarget(
             name: "PresentationTests",
-            dependencies: ["Presentation"],
+            dependencies: ["Analysis", "Presentation"],
             swiftSettings: strict
         ),
     ]

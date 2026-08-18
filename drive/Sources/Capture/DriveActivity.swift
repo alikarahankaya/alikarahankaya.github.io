@@ -30,7 +30,7 @@ public enum DriveActivityController {
 
     public static func start(startedAt: Date) {
         guard isAvailable, activity == nil else { return }
-        activity = try? Activity.request(
+        activity = try? Activity<DriveActivityAttributes>.request(
             attributes: DriveActivityAttributes(startedAt: startedAt),
             content: ActivityContent(state: .init(), staleDate: nil)
         )

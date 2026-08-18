@@ -20,7 +20,8 @@ public actor ReplayLocationFeed: LocationFeed {
     }
 
     public init(gpx url: URL, rate: Double = 10) throws {
-        self.init(samples: try GPXImporter.samples(contentsOf: url), rate: rate)
+        samples = try GPXImporter.samples(contentsOf: url)
+        self.rate = max(1, rate)
     }
 
     public func fixes() -> AsyncStream<LocationFix> {

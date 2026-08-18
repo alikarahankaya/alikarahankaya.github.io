@@ -132,10 +132,10 @@ public enum Conditioning {
 
     private static func interpolate(_ a: Double?, _ b: Double?, _ f: Double) -> Double? {
         switch (a, b) {
-        case let (x?, y?): x + (y - x) * f
-        case let (x?, nil): x
-        case let (nil, y?): y
-        default: nil
+        case (let x?, let y?): return x + (y - x) * f
+        case (let x?, nil): return x
+        case (nil, let y?): return y
+        case (nil, nil): return nil
         }
     }
 

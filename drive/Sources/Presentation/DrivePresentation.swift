@@ -17,6 +17,9 @@ public struct DrivePresentation: Sendable, Identifiable, Equatable {
     public var placeName: String?
     /// The driver's own line, if they wrote one.
     public var note: String?
+    /// What was playing, when it could be seen at all. Nothing here assumes
+    /// it can.
+    public var soundtrack: String?
 
     public init(
         id: UUID,
@@ -25,7 +28,8 @@ public struct DrivePresentation: Sendable, Identifiable, Equatable {
         analysis: DriveAnalysis,
         weatherSummary: String? = nil,
         placeName: String? = nil,
-        note: String? = nil
+        note: String? = nil,
+        soundtrack: String? = nil
     ) {
         self.id = id
         self.startedAt = startedAt
@@ -34,6 +38,7 @@ public struct DrivePresentation: Sendable, Identifiable, Equatable {
         self.weatherSummary = weatherSummary
         self.placeName = placeName
         self.note = note
+        self.soundtrack = soundtrack
     }
 
     public var palette: Palette { Palette(analysis.light) }

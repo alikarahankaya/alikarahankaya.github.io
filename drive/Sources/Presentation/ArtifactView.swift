@@ -96,6 +96,12 @@ public struct ArtifactView: View {
                 .font(Typography.figure)
                 .foregroundStyle(drive.palette.neutralColor)
 
+            if let soundtrack = drive.soundtrack, !soundtrack.isEmpty {
+                Text(soundtrack)
+                    .font(Typography.figure)
+                    .foregroundStyle(drive.palette.neutralColor)
+            }
+
             if let note = drive.note, !note.isEmpty {
                 Text(note)
                     .font(Typography.figure)

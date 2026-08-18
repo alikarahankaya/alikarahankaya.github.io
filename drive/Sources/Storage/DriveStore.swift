@@ -42,7 +42,8 @@ public actor DriveStore {
             vehicleFrameBlob: try record.vehicleFrame.map { try JSONEncoder().encode($0) },
             weatherSummary: record.weatherSummary,
             placeName: record.placeName,
-            note: record.note
+            note: record.note,
+            soundtrack: record.soundtrack
         )
         modelContext.insert(drive)
         try modelContext.save()
@@ -57,10 +58,16 @@ public actor DriveStore {
         try modelContext.save()
     }
 
-    public func describe(id: UUID, weather: String?, place: String?) throws {
+    public func describe(
+        id: UUID,
+        weather: String? = nil,
+        place: String? = nil,
+        soundtrack: String? = nil
+    ) throws {
         guard let drive = try drive(id: id) else { return }
         if let weather { drive.weatherSummary = weather }
         if let place { drive.placeName = place }
+        if let soundtrack { drive.soundtrack = soundtrack }
         try modelContext.save()
     }
 
@@ -96,7 +103,8 @@ public actor DriveStore {
             },
             weatherSummary: drive.weatherSummary,
             placeName: drive.placeName,
-            note: drive.note
+            note: drive.note,
+            soundtrack: drive.soundtrack
         )
     }
 }

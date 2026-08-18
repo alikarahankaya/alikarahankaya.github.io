@@ -27,6 +27,9 @@ public final class Drive {
     public var placeName: String?
     /// The driver's own line.
     public var note: String?
+    /// What was playing, when the system music player could see it — which
+    /// is Apple Music and the local library only.
+    public var soundtrack: String?
 
     public init(
         id: UUID = UUID(),
@@ -39,7 +42,8 @@ public final class Drive {
         vehicleFrameBlob: Data? = nil,
         weatherSummary: String? = nil,
         placeName: String? = nil,
-        note: String? = nil
+        note: String? = nil,
+        soundtrack: String? = nil
     ) {
         self.id = id
         self.startedAt = startedAt
@@ -52,6 +56,7 @@ public final class Drive {
         self.weatherSummary = weatherSummary
         self.placeName = placeName
         self.note = note
+        self.soundtrack = soundtrack
     }
 }
 
@@ -69,6 +74,7 @@ public struct DriveRecord: Sendable, Identifiable, Equatable {
     public var weatherSummary: String?
     public var placeName: String?
     public var note: String?
+    public var soundtrack: String?
 
     public init(
         id: UUID = UUID(),
@@ -81,7 +87,8 @@ public struct DriveRecord: Sendable, Identifiable, Equatable {
         vehicleFrame: VehicleFrame? = nil,
         weatherSummary: String? = nil,
         placeName: String? = nil,
-        note: String? = nil
+        note: String? = nil,
+        soundtrack: String? = nil
     ) {
         self.id = id
         self.startedAt = startedAt
@@ -94,5 +101,6 @@ public struct DriveRecord: Sendable, Identifiable, Equatable {
         self.weatherSummary = weatherSummary
         self.placeName = placeName
         self.note = note
+        self.soundtrack = soundtrack
     }
 }
