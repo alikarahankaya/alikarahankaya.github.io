@@ -96,8 +96,8 @@ public struct ArtifactView: View {
 
             if !copy.secondary.isEmpty {
                 HStack(spacing: 18) {
-                    ForEach(copy.secondary, id: \.self) { item in
-                        Text(item)
+                    ForEach(Array(copy.secondary.enumerated()), id: \.offset) { item in
+                        Text(item.element)
                     }
                 }
                 .font(Typography.figure)
@@ -105,8 +105,10 @@ public struct ArtifactView: View {
                 .padding(.top, 14)
             }
 
-            ForEach(copy.tertiary, id: \.self) { line in
-                Text(line)
+            // Indexed rather than keyed by content: two of these lines could
+            // in principle read the same, and a note is not a duplicate.
+            ForEach(Array(copy.tertiary.enumerated()), id: \.offset) { line in
+                Text(line.element)
                     .font(Typography.figure)
                     .foregroundStyle(palette.neutralColor)
             }
