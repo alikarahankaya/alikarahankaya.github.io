@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- The one place the product's name appears. Rename here and nowhere else. -->
+	<key>CFBundleDisplayName</key>
+	<string>Viraj</string>
+
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Records the road you drive so it can be drawn afterwards. The trace stays on this phone and is never uploaded.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Keeps recording the road with the screen off, so you can put the phone down and drive. The trace stays on this phone and is never uploaded.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Uses the motion sensors to tell how hard the car is cornering, and to notice when a drive starts and ends so you do not have to press anything.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Reads what is playing so the drive can remember it. Nothing is played, changed, or sent anywhere.</string>
+
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
+	<false/>
+
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+</dict>
+</plist>
