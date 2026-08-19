@@ -8,16 +8,13 @@ import Analysis
 /// down at the bottom, where logistics belong.
 public struct ArtifactView: View {
     public var drive: DrivePresentation
-    /// The poster export draws the same view with the chrome taken off.
-    public var isPoster: Bool
 
     @State private var progress: Double = 1
     @State private var showsLocation = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    public init(drive: DrivePresentation, isPoster: Bool = false) {
+    public init(drive: DrivePresentation) {
         self.drive = drive
-        self.isPoster = isPoster
     }
 
     /// Eight seconds to drive the whole road again: long enough to watch,
@@ -26,20 +23,21 @@ public struct ArtifactView: View {
     private static let replayDuration: Double = 8
 
     public var body: some View {
-        GeometryReader { geometry in
-            VStack(alignment: .leading, spacing: 0) {
-                trace
-                    .frame(height: geometry.size.height * 0.55)
-                rhythm
-                    .frame(height: max(36, geometry.size.height * 0.07))
-                    .padding(.top, 24)
-                figures
-                    .padding(.top, 28)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 28)
-            .padding(.vertical, isPoster ? 36 : 12)
+        VStack(alignment: .leading, spacing: 0) {
+            // The trace takes whatever the figures do not, which lands near
+            // the intended 55% on a phone and stays legible when Dynamic Type
+            // asks the figures for three times the room.
+            trace
+                .frame(maxHeight: .infinity)
+            rhythm
+                .frame(height: 44)
+                .padding(.top, 24)
+            figures
+                .padding(.top, 28)
         }
+        .padding(.horizontal, 28)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(drive.palette.groundColor)
         .sheet(isPresented: $showsLocation) {
             LocationSheet(drive: drive)
@@ -57,7 +55,7 @@ public struct ArtifactView: View {
         .onTapGesture { replay() }
         .accessibilityElement()
         .accessibilityLabel(Formatting.spokenSummary(drive))
-        .accessibilityHint(isPoster ? "" : "Double tap to replay the drive")
+        .accessibilityHint("Double tap to replay the drive")
         .accessibilityAddTraits(.isImage)
     }
 
@@ -112,20 +110,16 @@ public struct ArtifactView: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    @ViewBuilder
+    /// The only place MapKit appears: a quiet "where was this", asked for
+    /// rather than volunteered.
     private var conditions: some View {
-        let text = Text(Formatting.conditions(drive))
-            .font(Typography.figure)
-            .foregroundStyle(drive.palette.neutralColor)
-        if isPoster {
-            text
-        } else {
-            // The only place MapKit appears: a quiet "where was this",
-            // asked for rather than volunteered.
-            Button { showsLocation = true } label: { text }
-                .buttonStyle(.plain)
-                .accessibilityHint("Shows where this drive was")
+        Button { showsLocation = true } label: {
+            Text(Formatting.conditions(drive))
+                .font(Typography.figure)
+                .foregroundStyle(drive.palette.neutralColor)
         }
+        .buttonStyle(.plain)
+        .accessibilityHint("Shows where this drive was")
     }
 
     private var logistics: String {

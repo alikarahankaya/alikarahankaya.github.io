@@ -37,12 +37,19 @@ enum Formatting {
         }
     }
 
-    static func date(_ date: Date, timeZone: TimeZone, locale: Locale = .autoupdatingCurrent) -> String {
-        date.formatted(
-            .dateTime.day().month(.wide).year()
-                .locale(locale)
-                .timeZone(timeZone)
-        )
+    /// In the drive's own time zone, so an evening drive abroad still reads
+    /// as an evening. `timeZone` has to be set on the style rather than
+    /// chained: the chainable `timeZone(_:)` decides how a zone is *shown*,
+    /// not which one is used.
+    static func date(
+        _ date: Date,
+        timeZone: TimeZone,
+        locale: Locale = .autoupdatingCurrent
+    ) -> String {
+        var style = Date.FormatStyle.dateTime.day().month(.wide).year()
+        style.timeZone = timeZone
+        style.locale = locale
+        return date.formatted(style)
     }
 
     /// The tertiary line: light, then whatever else is actually known.

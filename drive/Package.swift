@@ -64,6 +64,11 @@ let package = Package(
             swiftSettings: strict
         ),
         .testTarget(
+            name: "CaptureTests",
+            dependencies: ["Core", "Capture"],
+            swiftSettings: strict
+        ),
+        .testTarget(
             name: "StorageTests",
             dependencies: ["Core", "Storage"],
             swiftSettings: strict

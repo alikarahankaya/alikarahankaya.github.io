@@ -40,6 +40,50 @@ public struct DriveAnalysis: Sendable, Codable, Equatable {
     public var imuAgreement: Double?
     public var imuTrusted: Bool
 
+    public init(
+        schemaVersion: Int,
+        distance: Double,
+        duration: TimeInterval,
+        sinuosity: Double,
+        corners: [Corner],
+        cornerDensity: Double,
+        flowDistance: Double,
+        leftMetres: Double,
+        rightMetres: Double,
+        elevationGain: Double,
+        elevationLoss: Double,
+        light: Light,
+        solarAltitude: Double,
+        midpoint: Coordinate,
+        midpointTime: Date,
+        trace: [TracePoint],
+        traceAspect: Double,
+        rhythm: [RhythmSample],
+        imuAgreement: Double?,
+        imuTrusted: Bool
+    ) {
+        self.schemaVersion = schemaVersion
+        self.distance = distance
+        self.duration = duration
+        self.sinuosity = sinuosity
+        self.corners = corners
+        self.cornerDensity = cornerDensity
+        self.flowDistance = flowDistance
+        self.leftMetres = leftMetres
+        self.rightMetres = rightMetres
+        self.elevationGain = elevationGain
+        self.elevationLoss = elevationLoss
+        self.light = light
+        self.solarAltitude = solarAltitude
+        self.midpoint = midpoint
+        self.midpointTime = midpointTime
+        self.trace = trace
+        self.traceAspect = traceAspect
+        self.rhythm = rhythm
+        self.imuAgreement = imuAgreement
+        self.imuTrusted = imuTrusted
+    }
+
     public var cornerCount: Int { corners.count }
 
     /// 0 = every corner turns left, 1 = every corner turns right, 0.5 = even.

@@ -13,6 +13,13 @@ public struct TracePoint: Sendable, Codable, Equatable {
     /// 0...1 lateral load, which the stroke weight follows: the line thickens
     /// through hard corners and thins on the straights.
     public var intensity: Double
+
+    public init(x: Double, y: Double, distance: Double, intensity: Double) {
+        self.x = x
+        self.y = y
+        self.distance = distance
+        self.intensity = intensity
+    }
 }
 
 /// One column of the rhythm strip.
@@ -20,6 +27,11 @@ public struct RhythmSample: Sendable, Codable, Equatable {
     public var distance: Double
     /// -1...1. Right corners positive, left negative.
     public var value: Double
+
+    public init(distance: Double, value: Double) {
+        self.distance = distance
+        self.value = value
+    }
 }
 
 public enum TraceBuilder {

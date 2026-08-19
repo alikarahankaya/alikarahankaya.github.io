@@ -61,8 +61,8 @@ public enum Solar {
     /// is simply up, and the only thing left worth distinguishing is whether
     /// the day is still arriving or already going.
     public static func light(at date: Date, lat: Double, lon: Double) -> Light {
-        let altitude = altitude(at: date, lat: lat, lon: lon)
-        switch altitude {
+        let sun = altitude(at: date, lat: lat, lon: lon)
+        switch sun {
         case ..<(-6):
             return .night
         case ..<0:

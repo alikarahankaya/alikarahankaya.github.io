@@ -10,11 +10,7 @@ public enum GPXError: Error, Equatable {
     case noTimestamps
 }
 
-/// GPX in, `[Sample]` out.
-///
-/// This exists so the analysis pipeline can be worked on at a desk: without
-/// it, every change to curvature or corner segmentation would need a car and
-/// a mountain. It also backs the debug replay recorder.
+/// A parsed track: the samples, and when they happened.
 public struct ImportedTrack: Sendable {
     public var samples: [Sample]
     /// Wall-clock time of the first point. Analysis needs it for the sun.
@@ -22,6 +18,11 @@ public struct ImportedTrack: Sendable {
     public var name: String?
 }
 
+/// GPX in, `[Sample]` out.
+///
+/// This exists so the analysis pipeline can be worked on at a desk: without
+/// it, every change to curvature or corner segmentation would need a car and
+/// a mountain. It also backs the debug replay recorder.
 public enum GPXImporter {
     public static func track(fromGPX data: Data) throws -> ImportedTrack {
         let (points, name) = try TrackParser.parse(data)
@@ -46,15 +47,15 @@ public enum GPXImporter {
             let before = points[max(0, i - 1)]
             let after = points[min(points.count - 1, i + 1)]
             let span = (after.time ?? start).timeIntervalSince(before.time ?? start)
-            let stride = Geo.distance(
+            let separation = Geo.distance(
                 fromLat: before.lat, lon: before.lon,
                 toLat: after.lat, lon: after.lon
             )
 
             // A recorder gives speed and course directly. A GPX file usually
             // does not, so they come from the neighbouring points instead.
-            let speed = p.speed ?? (span > 0 ? stride / span : 0)
-            let course = p.course ?? (stride > 0.5
+            let speed = p.speed ?? (span > 0 ? separation / span : 0)
+            let course = p.course ?? (separation > 0.5
                 ? Geo.bearing(fromLat: before.lat, lon: before.lon, toLat: after.lat, lon: after.lon)
                 : -1)
 

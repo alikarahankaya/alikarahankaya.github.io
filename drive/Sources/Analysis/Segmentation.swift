@@ -14,8 +14,10 @@ public enum Segmentation {
         useIMU: Bool = false
     ) -> [Corner] {
         precondition(points.count == k.count, "curvature must be one value per path point")
-        let runs = merged(runs(in: k, points: points), points: points)
-        return runs.compactMap { corner(from: $0, points: points, curvature: k, useIMU: useIMU) }
+        let segments = merged(runs(in: k, points: points), points: points)
+        return segments.compactMap {
+            corner(from: $0, points: points, curvature: k, useIMU: useIMU)
+        }
     }
 
     struct Run {
