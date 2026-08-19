@@ -47,12 +47,29 @@ public struct PaletteColor: Sendable, Equatable {
     }
 }
 
-/// The six lights a drive can be made in, and the two colours each one gives
-/// the artifact. A library of drives ends up sorted by the light it was driven
-/// in, which is a truer memory than a timestamp.
+/// White, or near-black. Which one depends on whether the sun is up.
 ///
-/// Every ink/ground pair clears 7:1 contrast; `PaletteTests` proves it rather
-/// than trusting the eye.
+/// Two surfaces rather than six: a white ground by day, and its inverse at
+/// night, where a white screen in a dark car is glare rather than design.
+public enum Surface: Sendable, Equatable {
+    case paper
+    case night
+}
+
+/// White and orange.
+///
+/// One identity, four roles, and the light of the drive to modulate them:
+///
+/// - **ground** — white, or near-black after dark. Tinted a degree or two by
+///   the light, never coloured by it.
+/// - **ink** — type. One per surface, and deep enough to clear 7:1.
+/// - **signal** — the orange. Every line in the app: the trace, the rhythm
+///   strip, the live ribbon. Nothing else is ever coloured.
+/// - **neutral** — secondary type, derived from the ink rather than picked.
+///
+/// The orange has to be a deep ember to carry type at 7:1 and a vivid one to
+/// carry a line, so those are two weights of one hue rather than two colours.
+/// `PaletteTests` proves every ratio instead of trusting the eye.
 public enum Palette: String, Sendable, CaseIterable, Codable {
     case night
     case dawn
@@ -61,36 +78,49 @@ public enum Palette: String, Sendable, CaseIterable, Codable {
     case golden
     case dusk
 
-    /// The paper.
+    public var surface: Surface {
+        switch self {
+        case .night, .dawn, .dusk: .night
+        case .morning, .day, .golden: .paper
+        }
+    }
+
+    /// The paper. Warmer or cooler by an amount you would only notice with
+    /// two drives side by side, which is exactly where it should be noticed.
     public var ground: PaletteColor {
         switch self {
-        case .night: PaletteColor(hex: 0x0B0C0E)   // near-black
-        case .dawn: PaletteColor(hex: 0x1C2430)    // deep blue-grey
-        case .morning: PaletteColor(hex: 0xEEF1F4) // cool off-white
-        case .day: PaletteColor(hex: 0xF5F1E8)     // warm off-white
-        case .golden: PaletteColor(hex: 0xF2E0BC)  // pale amber
-        case .dusk: PaletteColor(hex: 0x241D28)    // dark plum-grey
+        case .morning: PaletteColor(hex: 0xF7F8F9)  // cool white
+        case .day: PaletteColor(hex: 0xFBFAF7)      // warm white
+        case .golden: PaletteColor(hex: 0xFDF6EA)   // white, gone amber
+        case .dawn: PaletteColor(hex: 0x12100F)
+        case .dusk: PaletteColor(hex: 0x14100E)
+        case .night: PaletteColor(hex: 0x0C0B0A)
         }
     }
 
-    /// The line, and the headline figure. The only strong colour on screen.
+    /// Type. Deep burnt orange on paper, warm apricot at night: still the
+    /// same hue, turned around.
     public var ink: PaletteColor {
-        switch self {
-        case .night: PaletteColor(hex: 0xD8D2C8)   // pale warm grey
-        case .dawn: PaletteColor(hex: 0xE9BFC0)    // soft rose
-        case .morning: PaletteColor(hex: 0x2A3440) // slate
-        case .day: PaletteColor(hex: 0x14120E)     // near-black
-        case .golden: PaletteColor(hex: 0x3A2408)  // dark umber
-        case .dusk: PaletteColor(hex: 0xE8CE96)    // pale gold
+        switch surface {
+        case .paper: PaletteColor(hex: 0x6E2C05)
+        case .night: PaletteColor(hex: 0xFFC79E)
         }
     }
 
-    /// Secondary type. One rule rather than six more colours: the ink, pulled
-    /// 30% back towards the ground. A fixed grey cannot clear 4.5:1 on both a
-    /// near-black and a near-white ground; this can, on all six.
-    public var neutral: PaletteColor { ink.mixed(with: ground, amount: 0.30) }
+    /// The line. Vivid, and the only colour in the app that is allowed to be.
+    public var signal: PaletteColor {
+        switch self {
+        case .morning: PaletteColor(hex: 0xCC5410)
+        case .day: PaletteColor(hex: 0xD9590A)
+        case .golden: PaletteColor(hex: 0xC85206)
+        case .dawn: PaletteColor(hex: 0xFF8A4D)
+        case .dusk: PaletteColor(hex: 0xFF7A33)
+        case .night: PaletteColor(hex: 0xFF6A1F)
+        }
+    }
 
-    /// The rhythm strip, which wants to read as texture rather than as a
-    /// second headline. Half way to the ground.
-    public var texture: PaletteColor { ink.mixed(with: ground, amount: 0.50) }
+    /// Secondary type: the ink, three quarters of the way back to the ground.
+    /// One rule instead of six more colours, and it clears 4.5:1 on every
+    /// ground — which no single fixed grey can do across white and black.
+    public var neutral: PaletteColor { ink.mixed(with: ground, amount: 0.75) }
 }

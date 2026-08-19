@@ -24,8 +24,9 @@ What *has* been checked, because it was checkable without Swift:
   asserted in `Tests/AnalysisTests` is a measured output of that run, not a
   guess. Curvature came out within 0.7% of 1/r for radii from 12 m to 400 m.
 - The palette's contrast ratios were computed before the hex values were
-  chosen. All six ink/ground pairs clear 7:1; the derived neutral clears 4.5:1
-  on all six grounds.
+  chosen. Type clears 7:1 in all six lights (9.7–13.0:1), the orange clears the
+  3:1 graphics floor (3.7–8.1:1), and the derived neutral clears 4.5:1
+  (5.0–7.6:1) on every ground.
 - The solar position algorithm was checked against published altitudes
   (London midsummer noon 61.9°, Sydney midwinter noon 32.7°).
 
@@ -114,6 +115,50 @@ The Python is a development tool, not part of the app. It exists so the
 constants in `Analysis/Tuning.swift` could be argued with before they were
 committed to.
 
+## Colour
+
+White and orange, and one of each.
+
+| Role | What it is | Where it appears |
+|---|---|---|
+| ground | white, or near-black after dark | every screen |
+| ink | deep burnt orange, or warm apricot at night | type only |
+| signal | vivid orange | every line: trace, rhythm strip, live ribbon |
+| neutral | the ink, three quarters back to the ground | secondary type |
+
+Two surfaces rather than six palettes: white by day, its inverse at night,
+because a white screen in a dark car is glare rather than design. The six
+lights survive as the ground's tint and the orange's warmth, so a library
+still sorts itself by the light each drive was made in.
+
+The orange is two weights of one hue on purpose. A vivid orange cannot carry
+type at 7:1 on white — it tops out near 3:1 — so type uses the ember and lines
+use the signal. `PaletteTests` proves every ratio.
+
+## The screen while driving
+
+One line, and a number that is not always there.
+
+The line runs left to right through the last forty-five seconds. It rises when
+you accelerate, falls when you brake, and thickens with how hard the car is
+cornering — the same variable-weight stroke the artifact draws, with time on
+the axis instead of distance. At a steady cruise it flattens to a hairline and
+the number disappears, so the screen empties itself without being told to.
+
+The number appears only above 0.25 g and reads in the quiet neutral, not the
+orange. Nothing on this screen has to be read, there is no control to hit, and
+the only gesture is a long press anywhere to end the drive — during which the
+whole ribbon fades out, so the screen answers the gesture rather than a
+progress ring answering it.
+
+Not there, deliberately: speed, distance, elapsed time, corner count, a map. 
+Elapsed time is on the lock screen, where it costs nothing. Each of the others
+would be a reason to look down.
+
+Before the phone has worked out its orientation in the car there is no way to
+tell cornering from braking, so the ribbon draws a flat line and says nothing
+rather than guessing.
+
 ## Where this departs from the brief
 
 Each of these is also commented at the point it happens.
@@ -130,6 +175,11 @@ Each of these is also commented at the point it happens.
   down to each fix.
 - **The smoothing window is 21 m, not ~30 m.** Measured: 31 m flattens a 12 m
   hairpin by about 15%.
+- **There is a screen during the drive**, which the brief's one design rule
+  forbade. Reversed at the author's request; designed so that nothing on it
+  needs reading (see above).
+- **One palette modulated by light**, rather than six bespoke ink/ground
+  pairs, following the move to white and orange.
 
 ## Not done
 

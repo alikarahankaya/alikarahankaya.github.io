@@ -25,6 +25,10 @@ public actor DriveRecorder {
     /// without limit.
     private static let motionBufferLimit = 500
 
+    /// The live ribbon is fed every third motion reading — about 17 Hz, which
+    /// is smoother than a screen refresh needs and a third of the work.
+    private static let liveDecimation = 3
+
     private let location: any LocationFeed
     private let motion: any MotionFeed
 
@@ -35,6 +39,8 @@ public actor DriveRecorder {
     private var startedAt: Date?
     private var lastFix: LocationFix?
     private var distance: Double = 0
+    private var liveContinuation: AsyncStream<LiveReading>.Continuation?
+    private var motionCount = 0
 
     public init(
         location: any LocationFeed = LiveLocationFeed(),
@@ -42,6 +48,21 @@ public actor DriveRecorder {
     ) {
         self.location = location
         self.motion = motion
+    }
+
+    /// What the car is doing, for whatever wants to draw it. Nothing is
+    /// stored from this stream, and it is silent unless a drive is running.
+    ///
+    /// Buffering the newest few and dropping the rest is the right policy for
+    /// a screen: a reading that arrived while the last frame was drawing is
+    /// of no interest by the time the next one starts.
+    public func liveReadings() -> AsyncStream<LiveReading> {
+        liveContinuation?.finish()
+        let (stream, continuation) = AsyncStream<LiveReading>.makeStream(
+            bufferingPolicy: .bufferingNewest(8)
+        )
+        liveContinuation = continuation
+        return stream
     }
 
     public var isRecording: Bool { startedAt != nil }
@@ -94,6 +115,7 @@ public actor DriveRecorder {
         )
         samples = []
         pending = []
+        motionCount = 0
         guard ended.timeIntervalSince(started) >= Keeping.minimumDuration,
               distance >= Keeping.minimumDistance else { return nil }
         return recorded
@@ -102,6 +124,24 @@ public actor DriveRecorder {
     private func ingest(_ reading: MotionReading) {
         pending.append(reading)
         if pending.count > Self.motionBufferLimit { pending.removeFirst(pending.count / 2) }
+
+        motionCount += 1
+        guard let started = startedAt,
+              motionCount % Self.liveDecimation == 0,
+              let continuation = liveContinuation else { return }
+        // Before the frame is solved there is no way to tell cornering from
+        // braking, so the reading goes out with nothing in it rather than
+        // with a guess. The ribbon draws a flat line, which is the truth.
+        let resolved = solver.frame?.resolve(reading.userAcceleration)
+        continuation.yield(
+            LiveReading(
+                t: Date().timeIntervalSince(started),
+                lateralG: resolved?.lateral,
+                longitudinalG: resolved?.longitudinal,
+                speed: lastFix?.speed ?? -1,
+                coordinate: lastFix.map { Coordinate(lat: $0.lat, lon: $0.lon) }
+            )
+        )
     }
 
     private func ingest(_ fix: LocationFix) {

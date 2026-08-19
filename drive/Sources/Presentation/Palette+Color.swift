@@ -9,6 +9,14 @@ public extension PaletteColor {
 public extension Palette {
     var groundColor: Color { ground.color }
     var inkColor: Color { ink.color }
+    var signalColor: Color { signal.color }
     var neutralColor: Color { neutral.color }
-    var textureColor: Color { texture.color }
+
+    /// Light text on a dark ground wants a lighter status bar behind it.
+    var colorScheme: ColorScheme {
+        switch surface {
+        case .paper: .light
+        case .night: .dark
+        }
+    }
 }

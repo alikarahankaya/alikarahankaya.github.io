@@ -44,7 +44,7 @@ public struct RhythmStripView: View {
                 }
                 path.addLine(to: CGPoint(x: x(limit), y: middle))
                 path.closeSubpath()
-                context.fill(path, with: .color(palette.textureColor))
+                context.fill(path, with: .color(palette.signalColor))
             }
 
             var axis = Path()

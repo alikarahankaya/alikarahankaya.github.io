@@ -75,7 +75,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PresentationTests",
-            dependencies: ["Analysis", "Presentation"],
+            dependencies: ["Core", "Analysis", "Presentation"],
             swiftSettings: strict
         ),
     ]

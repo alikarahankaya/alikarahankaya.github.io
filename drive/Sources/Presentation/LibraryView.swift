@@ -8,22 +8,18 @@ import Analysis
 /// is the identifier, and it is a better one than "Tuesday afternoon".
 public struct LibraryView: View {
     public var drives: [DrivePresentation]
-    public var isRecording: Bool
     public var onStart: () -> Void
-    public var onStop: () -> Void
     public var onDelete: (DrivePresentation) -> Void
 
+    /// There is no stop here. While a drive is running the app is showing the
+    /// drive, not the library, and that screen owns ending it.
     public init(
         drives: [DrivePresentation],
-        isRecording: Bool,
         onStart: @escaping () -> Void,
-        onStop: @escaping () -> Void,
         onDelete: @escaping (DrivePresentation) -> Void
     ) {
         self.drives = drives
-        self.isRecording = isRecording
         self.onStart = onStart
-        self.onStop = onStop
         self.onDelete = onDelete
     }
 
@@ -35,6 +31,7 @@ public struct LibraryView: View {
                 list
             }
         }
+        .background(Palette.day.groundColor)
         .toolbar {
             ToolbarItem(placement: .primaryAction) { recordingControl }
         }
@@ -48,12 +45,14 @@ public struct LibraryView: View {
                 }
                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
                 .swipeActions {
                     Button("Delete", role: .destructive) { onDelete(drive) }
                 }
             }
         }
         .listStyle(.plain)
+        .scrollContentBackground(.hidden)
     }
 
     /// Says what to do, not that nothing is here.
@@ -61,22 +60,26 @@ public struct LibraryView: View {
         VStack(spacing: 12) {
             Text("Drive somewhere")
                 .font(Typography.headline(.title2))
+                .foregroundStyle(Palette.day.inkColor)
             Text("Recording starts on its own once you are moving. Anything over three minutes and two kilometres is kept.")
                 .font(Typography.figure)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Palette.day.neutralColor)
                 .multilineTextAlignment(.center)
         }
         .padding(40)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    @ViewBuilder
+    /// A drive starts on its own once the car does. This is for the times it
+    /// does not — a dot, not a word, because it is almost never the thing you
+    /// came here to do.
     private var recordingControl: some View {
-        if isRecording {
-            Button("Stop", action: onStop)
-        } else {
-            Button("Record", action: onStart)
+        Button(action: onStart) {
+            Circle()
+                .fill(Palette.day.signalColor)
+                .frame(width: 14, height: 14)
         }
+        .accessibilityLabel("Start recording")
     }
 }
 
@@ -89,7 +92,7 @@ struct LibraryRow: View {
             TraceView(trace: drive.analysis.trace, palette: drive.palette)
                 .frame(height: 150)
                 .background(drive.palette.groundColor)
-            Text(Formatting.date(drive.startedAt, timeZone: drive.timeZone))
+            Text(Formatting.shortDate(drive.startedAt, timeZone: drive.timeZone))
                 .quietLabel(drive.palette)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
@@ -112,9 +115,7 @@ struct LibraryRow: View {
                 PreviewDrive.sample(light: .morning),
                 PreviewDrive.sample(light: .night),
             ],
-            isRecording: false,
             onStart: {},
-            onStop: {},
             onDelete: { _ in }
         )
     }
@@ -124,9 +125,7 @@ struct LibraryRow: View {
     NavigationStack {
         LibraryView(
             drives: [],
-            isRecording: false,
             onStart: {},
-            onStop: {},
             onDelete: { _ in }
         )
     }

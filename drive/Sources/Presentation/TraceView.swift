@@ -34,8 +34,12 @@ public struct TraceView: View {
     /// Stroke weight as a fraction of the frame, so the line looks the same
     /// on a phone and on a 3× poster. The thin end is a hairline on a
     /// straight; the thick end is 0.6 g of corner.
-    private static let thinnest = 0.0045
-    private static let thickest = 0.0150
+    ///
+    /// Both ends are heavier than they were on a dark ground: orange on white
+    /// gives up about a third of its apparent weight, and a 0.45% line simply
+    /// disappeared.
+    private static let thinnest = 0.0065
+    private static let thickest = 0.0180
     /// Room for the stroke, and for the drawing to breathe.
     private static let inset = 0.05
 
@@ -52,37 +56,26 @@ public struct TraceView: View {
 
             let total = trace[trace.count - 1].distance
             let limit = total * min(1, max(0, progress))
-            var last = place(trace[0])
-            for i in 1..<trace.count {
-                let point = trace[i]
-                guard point.distance <= limit else { break }
-                let here = place(point)
-                var segment = Path()
-                segment.move(to: last)
-                segment.addLine(to: here)
-                let load = (trace[i - 1].intensity + point.intensity) / 2
-                context.stroke(
-                    segment,
-                    with: .color(palette.inkColor),
-                    style: StrokeStyle(
-                        lineWidth: side * (Self.thinnest + (Self.thickest - Self.thinnest) * load),
-                        lineCap: .round,
-                        lineJoin: .round
-                    )
-                )
-                last = here
-            }
+            let drawn = trace.prefix { $0.distance <= limit }
+            VariableStroke.draw(
+                &context,
+                points: drawn.map { (point: place($0), load: $0.intensity) },
+                color: palette.signalColor,
+                thinnest: side * Self.thinnest,
+                thickest: side * Self.thickest
+            )
 
-            if showsHead, progress < 1 {
+            if showsHead, progress < 1, let head = drawn.last {
+                let centre = place(head)
                 let radius = side * 0.013
                 context.fill(
                     Path(ellipseIn: CGRect(
-                        x: last.x - radius,
-                        y: last.y - radius,
+                        x: centre.x - radius,
+                        y: centre.y - radius,
                         width: radius * 2,
                         height: radius * 2
                     )),
-                    with: .color(palette.inkColor)
+                    with: .color(palette.signalColor)
                 )
             }
         }

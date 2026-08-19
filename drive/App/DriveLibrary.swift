@@ -13,6 +13,9 @@ import Presentation
 final class DriveLibrary {
     private(set) var drives: [DrivePresentation] = []
     private(set) var isRecording = false
+    /// What the car is doing, for the screen that draws it while driving.
+    /// Held in memory only; nothing here is ever written down.
+    let telemetry = LiveTelemetry()
     /// One line, shown once, if something went wrong that the driver can do
     /// anything about.
     private(set) var failure: String?
@@ -24,6 +27,7 @@ final class DriveLibrary {
     private let detector: TripDetector
     private var soundtrack: Task<Void, Never>?
     private var heardSoundtrack: String?
+    private var live: Task<Void, Never>?
 
     init(
         store: DriveStore,
@@ -65,6 +69,13 @@ final class DriveLibrary {
         let now = Date()
         isRecording = true
         heardSoundtrack = nil
+        telemetry.clear()
+        let readings = await recorder.liveReadings()
+        live = Task { [weak self] in
+            for await reading in readings {
+                self?.telemetry.append(reading)
+            }
+        }
         await recorder.start(at: now)
         await detector.setDriving(true)
         DriveActivityController.start(startedAt: now)
@@ -76,6 +87,8 @@ final class DriveLibrary {
         isRecording = false
         soundtrack?.cancel()
         soundtrack = nil
+        live?.cancel()
+        live = nil
         DriveActivityController.stop()
         await detector.setDriving(false)
         // Nothing back means the drive was too short to keep, which is not

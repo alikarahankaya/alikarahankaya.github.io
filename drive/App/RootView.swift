@@ -1,5 +1,8 @@
 import SwiftUI
 import UniformTypeIdentifiers
+// UIKit for one line: keeping the screen awake while driving has no SwiftUI
+// equivalent.
+import UIKit
 import Presentation
 
 struct RootView: View {
@@ -10,15 +13,34 @@ struct RootView: View {
     #endif
 
     var body: some View {
+        Group {
+            if library.isRecording {
+                // While the car is moving there is no app: there is the
+                // drive, and a long press to end it.
+                LiveDriveView(telemetry: library.telemetry) {
+                    Task { await library.stopRecording() }
+                }
+            } else {
+                libraryStack
+            }
+        }
+        .task {
+            await library.load()
+            await library.watchForDrives()
+        }
+        .onChange(of: library.isRecording, initial: true) { _, recording in
+            UIApplication.shared.isIdleTimerDisabled = recording
+        }
+    }
+
+    private var libraryStack: some View {
         NavigationStack(path: $path) {
             LibraryView(
                 drives: library.drives,
-                isRecording: library.isRecording,
                 onStart: { Task { await library.startRecording() } },
-                onStop: { Task { await library.stopRecording() } },
                 onDelete: { drive in Task { await library.delete(drive) } }
             )
-            .navigationTitle(library.isRecording ? "Recording" : "Drives")
+            .navigationTitle("Drives")
             .navigationDestination(for: UUID.self) { id in
                 if let drive = library.drives.first(where: { $0.id == id }) {
                     DriveScreen(drive: drive) { note in
@@ -48,10 +70,6 @@ struct RootView: View {
                         .padding()
                 }
             }
-        }
-        .task {
-            await library.load()
-            await library.watchForDrives()
         }
     }
 }

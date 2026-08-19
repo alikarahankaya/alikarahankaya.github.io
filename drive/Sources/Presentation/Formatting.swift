@@ -52,6 +52,26 @@ enum Formatting {
         return date.formatted(style)
     }
 
+    /// The library's date: the year only when it is not this one. A shelf of
+    /// this year's drives does not need to be told what year it is.
+    static func shortDate(
+        _ date: Date,
+        timeZone: TimeZone,
+        relativeTo now: Date = .now,
+        locale: Locale = .autoupdatingCurrent
+    ) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        let sameYear = calendar.component(.year, from: date)
+            == calendar.component(.year, from: now)
+        var style = sameYear
+            ? Date.FormatStyle.dateTime.day().month(.wide)
+            : Date.FormatStyle.dateTime.day().month(.wide).year()
+        style.timeZone = timeZone
+        style.locale = locale
+        return date.formatted(style)
+    }
+
     /// The tertiary line: light, then whatever else is actually known.
     static func conditions(_ drive: DrivePresentation) -> String {
         [light(drive.analysis.light), drive.weatherSummary, drive.placeName]

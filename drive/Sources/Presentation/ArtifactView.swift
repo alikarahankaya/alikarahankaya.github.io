@@ -3,9 +3,16 @@ import Analysis
 
 /// One drive, one screen. This is the product.
 ///
-/// Flow leads because it is the number that describes pleasure: how far the
-/// road let you keep going without interruption. Distance and duration are
-/// down at the bottom, where logistics belong.
+/// Every element here has to earn its place on this particular drive. A
+/// motorway has no rhythm strip, because it has no rhythm; a road that never
+/// bends says nothing about sinuosity; a drive whose weather was never
+/// fetched does not apologise for it. The layout is the same, the contents
+/// are not.
+///
+/// Flow leads, because it is the number that describes pleasure: how far the
+/// road let you keep going without interruption. When there was no such
+/// stretch, the headline is simply the distance — a real number instead of a
+/// proud zero.
 public struct ArtifactView: View {
     public var drive: DrivePresentation
 
@@ -29,115 +36,82 @@ public struct ArtifactView: View {
             // asks the figures for three times the room.
             trace
                 .frame(maxHeight: .infinity)
-            rhythm
-                .frame(height: 44)
-                .padding(.top, 24)
+            if !drive.analysis.corners.isEmpty {
+                rhythm
+                    .frame(height: 44)
+                    .padding(.top, 24)
+            }
             figures
                 .padding(.top, 28)
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(drive.palette.groundColor)
+        .background(palette.groundColor)
         .sheet(isPresented: $showsLocation) {
             LocationSheet(drive: drive)
         }
     }
 
+    private var palette: Palette { drive.palette }
+    private var copy: DriveCopy { DriveCopy(drive) }
+
     private var trace: some View {
         TraceView(
             trace: drive.analysis.trace,
-            palette: drive.palette,
+            palette: palette,
             progress: progress,
             showsHead: progress < 1
         )
         .contentShape(Rectangle())
         .onTapGesture { replay() }
+        // Where the drive was, on a long press. One gesture for the drawing,
+        // one for the world behind it, and no visible controls for either.
+        .onLongPressGesture { showsLocation = true }
         .accessibilityElement()
         .accessibilityLabel(Formatting.spokenSummary(drive))
         .accessibilityHint("Double tap to replay the drive")
+        .accessibilityAction(named: "Show where this drive was") { showsLocation = true }
         .accessibilityAddTraits(.isImage)
     }
 
     private var rhythm: some View {
         RhythmStripView(
             rhythm: drive.analysis.rhythm,
-            palette: drive.palette,
+            palette: palette,
             progress: progress
         )
         .accessibilityElement()
-        .accessibilityLabel(spokenRhythm)
+        .accessibilityLabel(copy.spokenRhythm)
     }
 
     private var figures: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(Formatting.distance(drive.analysis.flowDistance))
+            Text(copy.headline.value)
                 .font(Typography.headline())
-                .foregroundStyle(drive.palette.inkColor)
-                .accessibilityLabel(
-                    "Flow, \(Formatting.distance(drive.analysis.flowDistance))"
-                )
-            Text("Longest unbroken sequence")
-                .quietLabel(drive.palette)
+                .foregroundStyle(palette.inkColor)
+                .accessibilityLabel("\(copy.headline.label), \(copy.headline.value)")
+            Text(copy.headline.label)
+                .quietLabel(palette)
 
-            HStack(spacing: 18) {
-                Text(Formatting.corners(drive.analysis.corners.count))
-                Text(Formatting.sinuosity(drive.analysis.sinuosity))
-            }
-            .font(Typography.figure)
-            .foregroundStyle(drive.palette.inkColor)
-            .padding(.top, 14)
-
-            conditions
-
-            Text(logistics)
+            if !copy.secondary.isEmpty {
+                HStack(spacing: 18) {
+                    ForEach(copy.secondary, id: \.self) { item in
+                        Text(item)
+                    }
+                }
                 .font(Typography.figure)
-                .foregroundStyle(drive.palette.neutralColor)
-
-            if let soundtrack = drive.soundtrack, !soundtrack.isEmpty {
-                Text(soundtrack)
-                    .font(Typography.figure)
-                    .foregroundStyle(drive.palette.neutralColor)
+                .foregroundStyle(palette.inkColor)
+                .padding(.top, 14)
             }
 
-            if let note = drive.note, !note.isEmpty {
-                Text(note)
+            ForEach(copy.tertiary, id: \.self) { line in
+                Text(line)
                     .font(Typography.figure)
-                    .foregroundStyle(drive.palette.neutralColor)
-                    .padding(.top, 8)
+                    .foregroundStyle(palette.neutralColor)
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-    }
-
-    /// The only place MapKit appears: a quiet "where was this", asked for
-    /// rather than volunteered.
-    private var conditions: some View {
-        Button { showsLocation = true } label: {
-            Text(Formatting.conditions(drive))
-                .font(Typography.figure)
-                .foregroundStyle(drive.palette.neutralColor)
-        }
-        .buttonStyle(.plain)
-        .accessibilityHint("Shows where this drive was")
-    }
-
-    private var logistics: String {
-        [
-            Formatting.distance(drive.analysis.distance),
-            Formatting.duration(drive.analysis.duration),
-        ].joined(separator: " · ")
-    }
-
-    private var spokenRhythm: String {
-        let corners = drive.analysis.corners
-        guard !corners.isEmpty else { return "No corners" }
-        let tightest = corners.min { $0.severity < $1.severity }?.severity ?? 6
-        let left = corners.filter { $0.direction == .left }.count
-        return """
-        Corner rhythm. \(corners.count) corners, \(left) left and \
-        \(corners.count - left) right, tightest severity \(tightest).
-        """
     }
 
     private func replay() {
